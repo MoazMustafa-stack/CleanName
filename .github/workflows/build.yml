@@ -33,7 +33,7 @@ jobs:
             --onefile \
             --windowed \
             --name filename-cleaner \
-            --icon=icon.ico \
+            --icon=assets/icon.ico \
             src/file_renamer_gui.py
         shell: bash
       
@@ -53,3 +53,18 @@ jobs:
           name: filename-cleaner-${{ runner.os }}-${{ matrix.python-version }}
           path: dist/${{ steps.exec_name.outputs.exe_name }}
           retention-days: 30
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            filename-cleaner-Windows-3.11/filename-cleaner.exe
+            filename-cleaner-Linux-3.11/filename-cleaner
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
