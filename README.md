@@ -8,7 +8,7 @@
 
 > Clean up filenames by removing metadata prefixes. No installation required.
 
-[![Release](https://img.shields.io/github/v/release/MoazMustafa-stack/CleanName?style=for-the-badge&color=blue)](https://github.com/MoazMustafa-stack/CleanName/releases/latest)
+[![Release](https://img.shields.io/github/release/MoazMustafa-stack/CleanName?style=for-the-badge&color=blue)](https://github.com/MoazMustafa-stack/CleanName/releases/latest)
 [![License](https://img.shields.io/github/license/MoazMustafa-stack/CleanName?style=for-the-badge)](LICENSE)
 
 ---

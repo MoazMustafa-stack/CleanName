@@ -7,6 +7,7 @@ from pathlib import Path
 from filename_utils import clean_name
 import tkinter as tk
 from tkinter import messagebox, filedialog
+from PIL import Image, ImageTk
 
 try:
     from tkinterdnd2 import DND_FILES, TkinterDnD
@@ -16,67 +17,182 @@ except Exception:
     TkinterDnD = None
     DND_FILES = None
 
+COLOR_BG = "#121212"
+COLOR_SURFACE = "#1E1E1E"
+COLOR_ACCENT = "#3D7EBF"
+COLOR_TEXT = "#E0E0E0"
+COLOR_TEXT_SECONDARY = "#A0A0A0"
+COLOR_DND = "#252525"
 
 class FileRenamerApp:
 
     def __init__(self, root: tk.Tk):
         self.root = root
-        self.root.title("Filename Cleaner")
+        self.root.title("CleanName")
+        self.root.geometry("700x600")
+        self.root.resizable(False, False)
+        self.root.configure(bg=COLOR_BG)
+        self.center_window()
+        
         self.files: list[Path] = []
         self.file_set = set()
         self.allow_overwrite = tk.IntVar(value=0)
-        self._build_ui()
+        self.bg_image = None
+        
+        self.setup_ui()
 
-    def _build_ui(self) -> None:
-        frm = tk.Frame(self.root, padx=8, pady=8)
-        frm.pack(fill=tk.BOTH, expand=True)
+    def center_window(self) -> None:
+        self.root.update_idletasks()
+        w = self.root.winfo_width()
+        h = self.root.winfo_height()
+        x = (self.root.winfo_screenwidth() // 2) - (w // 2)
+        y = (self.root.winfo_screenheight() // 2) - (h // 2)
+        self.root.geometry(f"+{x}+{y}")
 
-        self.drop_label = tk.Label(
-            frm,
-            text=("Drag & drop files here" if DND_AVAILABLE else "Drag & drop not available - use Add Files"),
-            relief=tk.RIDGE,
-            width=48,
-            height=4,
-            bg="#f7f7f7",
-        )
-        self.drop_label.pack(fill=tk.X)
-
-        if DND_AVAILABLE:
+    def load_background_image(self) -> None:
+        asset_path = Path("assets/background.png")
+        if asset_path.exists():
             try:
-                self.drop_label.drop_target_register(DND_FILES)
-                self.drop_label.dnd_bind("<<Drop>>", self.on_drop)
+                img = Image.open(asset_path)
+                img = img.resize((700, 600), Image.Resampling.LANCZOS)
+                self.bg_image = ImageTk.PhotoImage(img)
+                self.bg_label.config(image=self.bg_image)
             except Exception:
                 pass
 
-        list_frame = tk.Frame(frm)
-        list_frame.pack(fill=tk.BOTH, expand=True, pady=(8, 0))
-
-        self.listbox = tk.Listbox(list_frame, height=12, width=100)
+    def setup_ui(self) -> None:
+        self.bg_label = tk.Label(self.root, bg=COLOR_BG)
+        self.bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+        self.load_background_image()
+        
+        main_frame = tk.Frame(self.root, bg=COLOR_BG)
+        main_frame.place(x=0, y=0, relwidth=1, relheight=1)
+        
+        dnd_frame = tk.Frame(main_frame, bg=COLOR_DND)
+        dnd_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        
+        dnd_inner = tk.Frame(dnd_frame, bg=COLOR_DND)
+        dnd_inner.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
+        
+        title_label = tk.Label(
+            dnd_inner,
+            text="Drag & drop files here",
+            font=("Arial", 14, "bold"),
+            bg=COLOR_DND,
+            fg=COLOR_TEXT
+        )
+        title_label.pack(pady=(0, 8))
+        
+        subtitle_label = tk.Label(
+            dnd_inner,
+            text="We'll keep only the clean filename",
+            font=("Arial", 10),
+            bg=COLOR_DND,
+            fg=COLOR_TEXT_SECONDARY
+        )
+        subtitle_label.pack(pady=(0, 20))
+        
+        self.dnd_zone = tk.Label(
+            dnd_inner,
+            text="↓ Drop files here ↓",
+            font=("Arial", 12),
+            bg=COLOR_SURFACE,
+            fg=COLOR_TEXT_SECONDARY,
+            height=4,
+            width=50
+        )
+        self.dnd_zone.pack(fill=tk.BOTH, expand=True, pady=10)
+        
+        if DND_AVAILABLE:
+            try:
+                self.dnd_zone.drop_target_register(DND_FILES)
+                self.dnd_zone.dnd_bind("<<Drop>>", self.on_drop)
+            except Exception:
+                pass
+        
+        list_frame = tk.Frame(dnd_inner, bg=COLOR_DND)
+        list_frame.pack(fill=tk.BOTH, expand=True, pady=(10, 0))
+        
+        self.listbox = tk.Listbox(
+            list_frame,
+            height=8,
+            width=60,
+            bg=COLOR_SURFACE,
+            fg=COLOR_TEXT,
+            selectmode=tk.NONE,
+            border=0,
+            highlightthickness=0
+        )
         self.listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
         scrollbar = tk.Scrollbar(list_frame, command=self.listbox.yview)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.listbox.config(yscrollcommand=scrollbar.set)
-
-        ctl_frame = tk.Frame(frm)
-        ctl_frame.pack(fill=tk.X, pady=(8, 0))
-
-        add_btn = tk.Button(ctl_frame, text="Add Files...", command=self.add_files)
-        add_btn.pack(side=tk.LEFT)
-
-        clear_btn = tk.Button(ctl_frame, text="Clear List", command=self.clear_list)
-        clear_btn.pack(side=tk.LEFT, padx=6)
-
-        rename_btn = tk.Button(ctl_frame, text="Rename Files", command=self.rename_files)
-        rename_btn.pack(side=tk.RIGHT)
-
-        overwrite_cb = tk.Checkbutton(
-            ctl_frame,
-            text="Allow overwrite (dangerous)",
-            variable=self.allow_overwrite,
+        
+        button_frame = tk.Frame(dnd_inner, bg=COLOR_DND)
+        button_frame.pack(fill=tk.X, pady=(10, 0))
+        
+        add_btn = tk.Button(
+            button_frame,
+            text="Add Files",
+            command=self.add_files,
+            bg=COLOR_SURFACE,
+            fg=COLOR_TEXT,
+            padx=12,
+            pady=6,
+            border=0,
+            cursor="hand2"
         )
-        overwrite_cb.pack(side=tk.RIGHT, padx=8)
-
-        self.status = tk.Label(self.root, text="Ready", anchor=tk.W)
+        add_btn.pack(side=tk.LEFT, padx=4)
+        
+        clear_btn = tk.Button(
+            button_frame,
+            text="Clear",
+            command=self.clear_list,
+            bg=COLOR_SURFACE,
+            fg=COLOR_TEXT_SECONDARY,
+            padx=12,
+            pady=6,
+            border=0,
+            cursor="hand2"
+        )
+        clear_btn.pack(side=tk.LEFT, padx=4)
+        
+        rename_btn = tk.Button(
+            button_frame,
+            text="Rename Files",
+            command=self.rename_files,
+            bg=COLOR_ACCENT,
+            fg="#FFFFFF",
+            padx=16,
+            pady=6,
+            border=0,
+            cursor="hand2",
+            font=("Arial", 10, "bold")
+        )
+        rename_btn.pack(side=tk.RIGHT, padx=4)
+        
+        overwrite_cb = tk.Checkbutton(
+            button_frame,
+            text="Allow overwrite",
+            variable=self.allow_overwrite,
+            bg=COLOR_DND,
+            fg=COLOR_TEXT_SECONDARY,
+            selectcolor=COLOR_SURFACE,
+            activebackground=COLOR_DND,
+            activeforeground=COLOR_TEXT
+        )
+        overwrite_cb.pack(side=tk.RIGHT, padx=4)
+        
+        self.status = tk.Label(
+            self.root,
+            text="Ready",
+            anchor=tk.W,
+            bg=COLOR_SURFACE,
+            fg=COLOR_TEXT_SECONDARY,
+            padx=10,
+            pady=4
+        )
         self.status.pack(fill=tk.X, side=tk.BOTTOM)
 
     def set_status(self, text: str) -> None:
@@ -116,7 +232,7 @@ class FileRenamerApp:
         for p in self.files:
             newname = clean_name(p.name)
             self.listbox.insert(tk.END, f"{p.name} → {newname}")
-        self.set_status(f"{len(self.files)} file(s) in list — dry-run preview")
+        self.set_status(f"{len(self.files)} file(s) ready — dry-run preview")
 
     def clear_list(self) -> None:
         self.files.clear()
@@ -139,7 +255,7 @@ class FileRenamerApp:
 
         summary_lines = [f"{len(mappings)} files will be processed."]
         if collisions and not self.allow_overwrite.get():
-            summary_lines.append(f"{len(collisions)} target(s) already exist and will be skipped unless overwrite is enabled.")
+            summary_lines.append(f"{len(collisions)} target(s) already exist and will be skipped.")
 
         summary = "\n".join(summary_lines)
         if not messagebox.askyesno("Confirm Rename", f"Proceed with rename?\n\n{summary}"):

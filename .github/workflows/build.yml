@@ -48,7 +48,7 @@ jobs:
           fi
       
       - name: Upload build artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: filename-cleaner-${{ runner.os }}-${{ matrix.python-version }}
           path: dist/${{ steps.exec_name.outputs.exe_name }}
