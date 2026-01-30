@@ -1,6 +1,42 @@
+<div align="center">
+
+> **Made for VIT students by a VIT student** 🎓
+
 # Filename Cleaner
 
-A small, safe desktop utility that helps you clean up filenames by removing unwanted metadata prefixes. Works on Windows and Linux — no Python installation required.
+### *Simple. Safe. Fast.*
+
+> Clean up filenames by removing metadata prefixes. No installation required.
+
+[![Release](https://img.shields.io/github/v/release/MoazMustafa-stack/CleanName?style=for-the-badge&color=blue)](https://github.com/MoazMustafa-stack/CleanName/releases/latest)
+[![License](https://img.shields.io/github/license/MoazMustafa-stack/CleanName?style=for-the-badge)](LICENSE)
+
+---
+
+</div>
+
+## Download
+
+| Platform | Download |
+|----------|----------|
+| **Windows** | [`.exe`](https://github.com/MoazMustafa-stack/CleanName/releases/latest) |
+| **Linux** | [Binary](https://github.com/MoazMustafa-stack/CleanName/releases/latest) |
+| **From Source** | Python 3.10+ |
+
+> **[View all releases](https://github.com/MoazMustafa-stack/CleanName/releases)**
+
+---
+
+## Built With
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/Tkinter-FFD700?style=for-the-badge&logoColor=black" />
+  <img src="https://img.shields.io/badge/PyInstaller-1E1E1E?style=for-the-badge&logoColor=white" />
+  <img src="https://img.shields.io/badge/GitHub%20Actions-2088F0?style=for-the-badge&logo=github-actions&logoColor=white" />
+</p>
+
+---
 
 ## What It Does
 
@@ -103,6 +139,22 @@ python src/file_renamer_gui.py
 **"Allow overwrite" is unchecked but it says targets exist**
 - This is correct behavior. The app lists targets that exist; they will be skipped unless you check "Allow overwrite".
 
-## License
+---
 
-This project is provided under the MIT License. See [LICENSE](LICENSE) for details.
+## 🤝 Contributing & Feedback
+
+Found a bug? Have a suggestion? Open an [issue](https://github.com/MoazMustafa-stack/CleanName/issues) or submit a pull request.
+
+---
+
+## 📜 License
+
+MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+<div align="center">
+
+**Made with ❤️ using Python & Tkinter**
+
+</div>
