@@ -17,17 +17,12 @@ except Exception:
     DND_FILES = None
 
 
-# `clean_name` is provided by `filename_utils.py` so tests and other tools
-# can import the function without importing tkinter.
-
-
 class FileRenamerApp:
-    """Main application class."""
 
     def __init__(self, root: tk.Tk):
         self.root = root
         self.root.title("Filename Cleaner")
-        self.files: list[Path] = []  # preserve order
+        self.files: list[Path] = []
         self.file_set = set()
         self.allow_overwrite = tk.IntVar(value=0)
         self._build_ui()
@@ -36,7 +31,6 @@ class FileRenamerApp:
         frm = tk.Frame(self.root, padx=8, pady=8)
         frm.pack(fill=tk.BOTH, expand=True)
 
-        # Instruction / drop area
         self.drop_label = tk.Label(
             frm,
             text=("Drag & drop files here" if DND_AVAILABLE else "Drag & drop not available - use Add Files"),
@@ -48,15 +42,12 @@ class FileRenamerApp:
         self.drop_label.pack(fill=tk.X)
 
         if DND_AVAILABLE:
-            # Register drop handler
             try:
                 self.drop_label.drop_target_register(DND_FILES)
                 self.drop_label.dnd_bind("<<Drop>>", self.on_drop)
             except Exception:
-                # some platforms may still fail; leave label as informational
                 pass
 
-        # Preview list with old -> new
         list_frame = tk.Frame(frm)
         list_frame.pack(fill=tk.BOTH, expand=True, pady=(8, 0))
 
@@ -66,7 +57,6 @@ class FileRenamerApp:
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.listbox.config(yscrollcommand=scrollbar.set)
 
-        # Controls
         ctl_frame = tk.Frame(frm)
         ctl_frame.pack(fill=tk.X, pady=(8, 0))
 
@@ -86,7 +76,6 @@ class FileRenamerApp:
         )
         overwrite_cb.pack(side=tk.RIGHT, padx=8)
 
-        # Status area
         self.status = tk.Label(self.root, text="Ready", anchor=tk.W)
         self.status.pack(fill=tk.X, side=tk.BOTTOM)
 
@@ -111,11 +100,6 @@ class FileRenamerApp:
         self.file_set.add(resolved)
 
     def on_drop(self, event) -> None:
-        """Handle files dropped onto the drop label.
-
-        Event.data can contain one or more filenames; use splitlist to
-        get them robustly. Ignore directories and duplicates.
-        """
         try:
             items = self.root.tk.splitlist(event.data)
         except Exception:
@@ -131,7 +115,7 @@ class FileRenamerApp:
         self.listbox.delete(0, tk.END)
         for p in self.files:
             newname = clean_name(p.name)
-            self.listbox.insert(tk.END, f"{p.name} \u001E {newname}")
+            self.listbox.insert(tk.END, f"{p.name} → {newname}")
         self.set_status(f"{len(self.files)} file(s) in list — dry-run preview")
 
     def clear_list(self) -> None:
@@ -174,11 +158,9 @@ class FileRenamerApp:
                     if not self.allow_overwrite.get():
                         skipped += 1
                         continue
-                    # overwrite allowed
                     os.replace(src, dst)
                     renamed += 1
                 else:
-                    # same path or target does not exist
                     if str(dst.resolve()) == str(src.resolve()):
                         skipped += 1
                         continue
